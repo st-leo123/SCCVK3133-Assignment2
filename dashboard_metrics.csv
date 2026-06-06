@@ -1,0 +1,13 @@
+file_id,platform,creator_type,title,views,likes,comments_count,engagement_rate_pct,comment_velocity_pct,sentiment_score,skepticism_index_pct
+yt1,YouTube,Human,What If You Just Keep Digging?,12747404,175000,5533,1.42,0.04,0.2186,12.0
+yt2,YouTube,Human,How An Infinite Hotel Ran Out Of Room,36895720,994000,82469,2.92,0.22,0.1011,16.0
+yt3,YouTube,Human,What is hantavirus and how is it spread? | BBC News,2117775,31000,6138,1.75,0.29,0.0029,15.0
+yt4,YouTube,AI,OpenAI Plays Hide and Seek…and Breaks The Game! 🤖,10899857,367000,8443,3.44,0.08,0.1321,42.0
+yt5,YouTube,AI,Lil Yachty Tells Adin Ross That Polo G Wants To Fight Him For Acting Sus...,3366590,94000,5051,2.94,0.15,0.1058,14.0
+yt6,YouTube,AI,How BIG is Samsung? (They Have a Military Department!),7938738,167000,13678,2.28,0.17,0.1088,5.0
+ig1,Instagram,Human,Instagram Post 1,1216872,151584,6396,12.98,0.53,-0.1452,17.02
+ig2,Instagram,Human,Instagram Post 2,3342433,368242,771,11.04,0.02,0.1458,4.23
+ig3,Instagram,Human,Instagram Post 3,6521684,613474,17786,9.68,0.27,0.1573,16.0
+ig4,Instagram,AI,Instagram Post 4,2183262,288569,3378,13.37,0.15,-0.073,6.9
+ig5,Instagram,AI,Instagram Post 5,168262,10699,715,6.78,0.42,0.0139,16.16
+ig6,Instagram,AI,Instagram Post 6,8941921,426947,2017,4.8,0.02,0.1888,10.2

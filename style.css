@@ -1,0 +1,149 @@
+:root {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent: #38bdf8;
+    --border: #334155;
+}
+
+/* Make body exactly 100vh and hide scrolling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    padding: 10px 20px;
+    height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.header {
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+.header h1 { margin: 0 0 5px 0; color: var(--accent); font-size: 24px; }
+.header p { margin: 0; color: var(--text-muted); font-size: 14px; }
+
+/* Filters & Scorecards */
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+select {
+    padding: 5px 10px;
+    background-color: var(--card-bg);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.scorecard-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+.scorecard {
+    background-color: var(--card-bg);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    text-align: center;
+    flex: 1;
+}
+.scorecard h4 { margin: 0 0 5px 0; color: var(--text-muted); font-size: 12px; font-weight: normal; }
+.scorecard .value { font-size: 20px; font-weight: bold; }
+
+/* Dashboard Layout (Split left/right to fit one screen) */
+.dashboard-main {
+    display: flex;
+    gap: 15px;
+    flex-grow: 1;
+    min-height: 0; /* Critical for flex shrinking */
+}
+
+/* 2x2 Charts Grid */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 15px;
+    flex: 2; /* Takes 2/3 of the space */
+    min-height: 0;
+}
+
+.card {
+    background-color: var(--card-bg);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.card h3 { margin: 0 0 10px 0; text-align: center; color: var(--accent); font-size: 14px; flex-shrink: 0; }
+
+/* Chart.js resizing wrapper */
+.chart-wrapper {
+    position: relative;
+    flex-grow: 1;
+    min-height: 0;
+    width: 100%;
+}
+
+/* Table Section */
+.table-card {
+    flex: 1; /* Takes 1/3 of the space */
+}
+.table-wrapper {
+    overflow-y: auto; /* Internal scrolling just for the table */
+    flex-grow: 1;
+    /* Firefox scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) var(--bg-color);
+}
+
+/* Webkit (Chrome/Edge) custom scrollbar styling */
+.table-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+.table-wrapper::-webkit-scrollbar-track {
+    background: var(--bg-color);
+    border-radius: 4px;
+}
+.table-wrapper::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 4px;
+}
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-muted);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+th, td { padding: 8px; text-align: left; border-bottom: 1px solid var(--border); }
+
+/* Sticky Header Fix */
+th { 
+    background-color: var(--card-bg); 
+    color: var(--accent); 
+    position: sticky; 
+    top: 0; 
+    z-index: 10; 
+    box-shadow: 0 2px 2px -1px rgba(0,0,0,0.4);
+}

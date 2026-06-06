@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Authenticity vs. AI Auditor</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="header">
+        <h1>The Authenticity vs. AI Auditor</h1>
+        <p>Tracking the Trust Gap between Human Creators and Virtual Influencers</p>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <select id="platformFilter">
+            <option value="all">All Platforms</option>
+            <option value="YouTube">YouTube</option>
+            <option value="Instagram">Instagram</option>
+        </select>
+        
+        <select id="creatorFilter">
+            <option value="all">All Creators</option>
+            <option value="Human">Human Only</option>
+            <option value="AI">AI Only</option>
+        </select>
+    </div>
+
+    <!-- Scorecards -->
+    <div class="scorecard-container">
+        <div class="scorecard">
+            <h4>Avg Sentiment (Trust)</h4>
+            <div class="value" id="scoreSentiment">--</div>
+        </div>
+        <div class="scorecard">
+            <h4>Skepticism Index</h4>
+            <div class="value" id="scoreSkepticism">--%</div>
+        </div>
+        <div class="scorecard">
+            <h4>Avg Engagement</h4>
+            <div class="value" id="scoreEngagement">--%</div>
+        </div>
+        <div class="scorecard">
+            <h4>Comment Velocity</h4>
+            <div class="value" id="scoreVelocity">--%</div>
+        </div>
+    </div>
+
+    <!-- Dashboard Main Area (Charts Left, Table Right) -->
+    <div class="dashboard-main">
+        
+        <!-- Charts 2x2 Grid -->
+        <div class="charts-grid">
+            <div class="card">
+                <h3>The "Trust Gap"</h3>
+                <div class="chart-wrapper"><canvas id="barChart"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Authenticity vs. Hype</h3>
+                <div class="chart-wrapper"><canvas id="scatterChart"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Interaction Ratio</h3>
+                <div class="chart-wrapper"><canvas id="pieChart"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Auditor Profile</h3>
+                <div class="chart-wrapper"><canvas id="radarChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="card table-card">
+            <h3>Raw Audit Data</h3>
+            <div class="table-wrapper">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Platform</th>
+                            <th>Type</th>
+                            <th>Views</th>
+                            <th>Eng.</th>
+                            <th>Trust</th>
+                            <th>Skp.</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
