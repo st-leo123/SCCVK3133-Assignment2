@@ -4,17 +4,16 @@ import pandas as pd
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-# Download VADER lexicon for sentiment analysis if not already downloaded
+# Download VADER lexicon
 try:
     nltk.data.find('sentiment/vader_lexicon.zip')
 except LookupError:
     nltk.download('vader_lexicon')
 
-# Initialize the VADER Sentiment Analyzer
+
 sia = SentimentIntensityAnalyzer()
 
-# Configuration arrays based on your naming convention
-platforms = ['yt', 'tg', 'ig']  # 'yt' = YouTube, 'tg' = TikTok, 'ig' = Instagram
+platforms = ['yt', 'ig'] 
 human_indices = [1, 2, 3]
 ai_indices = [4, 5, 6]
 all_indices = human_indices + ai_indices
@@ -119,7 +118,6 @@ def main():
                     title = general_data.get('title', f"TikTok Video {num}")
                     platform_label = "TikTok"
 
-                # Process calculations safely to avoid ZeroDivisionError
                 engagement_rate = ((likes + comments_count) / views * 100) if views > 0 else 0.0
                 comment_velocity = (comments_count / views * 100) if views > 0 else 0.0
                 

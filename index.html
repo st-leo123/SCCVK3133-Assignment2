@@ -3,96 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Authenticity vs. AI Auditor</title>
+    <title>Authenticity VS AI Auditor Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <div class="header">
-        <h1>The Authenticity vs. AI Auditor</h1>
-        <p>Tracking the Trust Gap between Human Creators and Virtual Influencers</p>
-    </div>
-
-    <!-- Controls -->
-    <div class="controls">
-        <select id="platformFilter">
-            <option value="all">All Platforms</option>
-            <option value="YouTube">YouTube</option>
-            <option value="Instagram">Instagram</option>
-        </select>
-        
-        <select id="creatorFilter">
-            <option value="all">All Creators</option>
-            <option value="Human">Human Only</option>
-            <option value="AI">AI Only</option>
-        </select>
-    </div>
-
-    <!-- Scorecards -->
-    <div class="scorecard-container">
-        <div class="scorecard">
-            <h4>Avg Sentiment (Trust)</h4>
-            <div class="value" id="scoreSentiment">--</div>
-        </div>
-        <div class="scorecard">
-            <h4>Skepticism Index</h4>
-            <div class="value" id="scoreSkepticism">--%</div>
-        </div>
-        <div class="scorecard">
-            <h4>Avg Engagement</h4>
-            <div class="value" id="scoreEngagement">--%</div>
-        </div>
-        <div class="scorecard">
-            <h4>Comment Velocity</h4>
-            <div class="value" id="scoreVelocity">--%</div>
-        </div>
-    </div>
-
-    <!-- Dashboard Main Area (Charts Left, Table Right) -->
-    <div class="dashboard-main">
-        
-        <!-- Charts 2x2 Grid -->
-        <div class="charts-grid">
-            <div class="card">
-                <h3>The "Trust Gap"</h3>
-                <div class="chart-wrapper"><canvas id="barChart"></canvas></div>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Authenticity VS AI Auditor</h2>
+                <h1>The Trust Gap Across Platforms</h1>
             </div>
-            <div class="card">
-                <h3>Authenticity vs. Hype</h3>
-                <div class="chart-wrapper"><canvas id="scatterChart"></canvas></div>
-            </div>
-            <div class="card">
-                <h3>Interaction Ratio</h3>
-                <div class="chart-wrapper"><canvas id="pieChart"></canvas></div>
-            </div>
-            <div class="card">
-                <h3>Auditor Profile</h3>
-                <div class="chart-wrapper"><canvas id="radarChart"></canvas></div>
-            </div>
-        </div>
+            
+            <nav class="sidebar-menu">
+                <button class="menu-btn active" data-target="overviewSection">Overview</button>
+                <button class="menu-btn" data-target="engagementSection">Engagement Analysis</button>
+                <button class="menu-btn" data-target="platformSection">Platform Comparison</button>
+            </nav>
 
-        <!-- Data Table -->
-        <div class="card table-card">
-            <h3>Raw Audit Data</h3>
-            <div class="table-wrapper">
-                <table id="dataTable">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Platform</th>
-                            <th>Type</th>
-                            <th>Views</th>
-                            <th>Eng.</th>
-                            <th>Trust</th>
-                            <th>Skp.</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <div class="sidebar-footer">
+                <div class="scale-image">⚖️</div>
+                <p>Data verified for assignment</p>
             </div>
-        </div>
+        </aside>
 
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- PAGE 1: OVERVIEW SECTION -->
+            <section id="overviewSection" class="page-section active">
+                <header class="main-header">
+                    <h1>Overview Dashboard</h1>
+                    <h3>Overall performance comparison between AI generated creators and human creators.</h3>
+                </header>
+
+                <div class="toggle-row">
+                    <select id="platformToggle" class="toggle-menu">
+                        <option value="all">Platform: All</option>
+                        <option value="YouTube">YouTube</option>
+                        <option value="Instagram">Instagram</option>
+                    </select>
+                    <select id="creatorToggle" class="toggle-menu">
+                        <option value="all">Creator Type: All</option>
+                        <option value="Human">Human</option>
+                        <option value="AI">AI</option>
+                    </select>
+                    <select id="viewsToggle" class="toggle-menu">
+                        <option value="all">Video Views: All Ranges</option>
+                        <option value="high">High (> 5M)</option>
+                        <option value="low">Low (< 5M)</option>
+                    </select>
+                </div>
+
+                <div class="kpi-row">
+                    <div class="kpi-card">
+                        <h4>Total Views</h4>
+                        <p id="totalViews">0</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h4>Total Likes</h4>
+                        <p id="totalLikes">0</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h4>Total Comments</h4>
+                        <p id="totalComments">0</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h4>Engagement Rate</h4>
+                        <p id="avgEngagement">0%</p>
+                    </div>
+                </div>
+
+                <div class="charts-row flex-grow-row">
+                    <div class="chart-container flex-1">
+                        <h4>Creator Type Distribution</h4>
+                        <div class="canvas-wrapper"><canvas id="distributionChart"></canvas></div>
+                    </div>
+                    <div class="chart-container flex-2">
+                        <h4>Authenticity vs. Hype Matrix</h4>
+                        <div class="canvas-wrapper"><canvas id="hypeMatrixChart"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="insights-container">
+                    <h4>💡 Key Insight We Learned</h4>
+                    <p id="overviewDynamicInsight">Contrary to our initial hypothesis, the "Trust Gap" has practically closed. The data reveals that AI and Human creators share nearly identical baseline sentiment scores. Audiences are evaluating content based on entertainment value rather than the biological reality of the creator.</p>
+                </div>
+            </section>
+
+            <!-- PAGE 2: ENGAGEMENT ANALYSIS SECTION -->
+            <section id="engagementSection" class="page-section">
+                <header class="main-header">
+                    <h1>Engagement Analysis</h1>
+                    <h3>How audience engage with AI and human creator.</h3>
+                </header>
+
+                <div class="charts-row flex-grow-row">
+                    <div class="chart-container">
+                        <h4>The Trust Gap (Individual Sentiment Scores)</h4>
+                        <div class="canvas-wrapper"><canvas id="sentimentChart"></canvas></div>
+                    </div>
+                    <div class="chart-container">
+                        <h4>Interaction Ratio (Likes vs Comments)</h4>
+                        <div class="canvas-wrapper"><canvas id="interactionRatioChart"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="charts-row split-row flex-grow-row">
+                    <div class="chart-container flex-2">
+                        <h4>Engagement Rates by Video</h4>
+                        <div class="canvas-wrapper"><canvas id="platformEngChart"></canvas></div>
+                    </div>
+                    <div class="insights-container flex-1 side-insight">
+                        <h4>💡 Insight Gained</h4>
+                        <p>The sentiment scores between humans (+0.080) and AI (+0.079) are statistically identical. Shockingly, the most positive video in our dataset is AI-generated (ig6), while the most negative is human-generated (ig1). This proves that being human does not guarantee audience trust or positive engagement.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 3: PLATFORM COMPARISON SECTION -->
+            <section id="platformSection" class="page-section">
+                <header class="main-header">
+                    <h1>Platform Comparison</h1>
+                    <h3>How individual videos perform across platforms.</h3>
+                </header>
+
+                <div class="charts-row flex-grow-row">
+                    <div class="chart-container">
+                        <h4>Skepticism Index by Video</h4>
+                        <div class="canvas-wrapper"><canvas id="platSkepticismChart"></canvas></div>
+                    </div>
+                    <div class="chart-container">
+                        <h4>Raw View Count by Video</h4>
+                        <div class="canvas-wrapper"><canvas id="platViewsChart"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="table-container flex-grow-row">
+                    <div class="table-wrapper">
+                        <table id="platformSummaryTable">
+                            <thead>
+                                <tr>
+                                    <th>Video ID</th>
+                                    <th>Platform</th>
+                                    <th>Type</th>
+                                    <th>Views</th>
+                                    <th>Eng. Rate</th>
+                                    <th>Skepticism</th>
+                                    <th>Trust Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="insights-container">
+                    <h4>💡 Key Insight & Recommendation</h4>
+                    <p>The perceived "AI Skepticism" is actually an illusion driven by a single YouTube outlier (yt4 at 42%). Without it, AI creators actually faced <strong>less</strong> average skepticism than human creators. <strong>Recommendation:</strong> Brands should confidently deploy AI influencers. Audiences have normalized their presence, especially on fast-paced visual platforms like Instagram.</p>
+                </div>
+            </section>
+
+        </main>
     </div>
 
     <script src="app.js"></script>

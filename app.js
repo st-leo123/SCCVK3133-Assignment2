@@ -1,268 +1,224 @@
 let auditData = [];
-let charts = {};
 
-const colors = {
-    human: 'rgba(56, 189, 248, 0.8)',
-    humanBorder: 'rgba(56, 189, 248, 1)',
-    ai: 'rgba(244, 63, 94, 0.8)',
-    aiBorder: 'rgba(244, 63, 94, 1)'
+let charts = {
+    distribution: null, 
+    hypeMatrix: null, 
+    sentiment: null, 
+    interactionRatio: null, 
+    platformEng: null, 
+    platSkepticism: null, 
+    platViews: null
 };
+
+const colors = { blue: '#3b82f6', purple: '#a855f7' };
 
 async function loadData() {
     try {
         const response = await fetch('./dashboard_metrics.json');
         let rawData = await response.json();
-        
-        // Removing TikTok
         auditData = rawData.filter(row => row.platform !== 'TikTok');
         
-        setupEventListeners();
+        setupNavigation();
+        setupToggles();
         updateDashboard(auditData);
     } catch (error) {
         console.error("Error loading JSON data:", error);
     }
 }
 
-function setupEventListeners() {
-    document.getElementById('platformFilter').addEventListener('change', applyFilters);
-    document.getElementById('creatorFilter').addEventListener('change', applyFilters);
+function setupNavigation() {
+    const buttons = document.querySelectorAll('.menu-btn');
+    const sections = document.querySelectorAll('.page-section');
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            buttons.forEach(b => b.classList.remove('active'));
+            sections.forEach(s => s.classList.remove('active'));
+
+            btn.classList.add('active');
+            const targetId = btn.getAttribute('data-target');
+            document.getElementById(targetId).classList.add('active');
+            
+            applyFilters();
+        });
+    });
+    
+    window.addEventListener('resize', () => { applyFilters(); });
+}
+
+function setupToggles() {
+    document.getElementById('platformToggle').addEventListener('change', applyFilters);
+    document.getElementById('creatorToggle').addEventListener('change', applyFilters);
+    document.getElementById('viewsToggle').addEventListener('change', applyFilters);
+}
+
+function updateDynamicInsight(platform, creator, viewRange) {
+    const insightElement = document.getElementById('overviewDynamicInsight');
+    if (!insightElement) return;
+
+    let insightText = "Contrary to our initial hypothesis, the 'Trust Gap' has practically closed. The data reveals that AI and Human creators share nearly identical baseline sentiment scores. Audiences are evaluating content based on entertainment value rather than the biological reality of the creator.";
+
+    if (creator === 'AI') {
+        insightText = "Focusing on AI creators shows a successful crossing of the Uncanny Valley. Excluding one major outlier, AI videos actually triggered lower average skepticism than their human counterparts.";
+    } else if (creator === 'Human') {
+        insightText = "Looking at Human creators, we see that biological authenticity does not guarantee universal trust. In fact, the single most negative and hostile comment section in our dataset belonged to a human creator.";
+    } else if (platform === 'YouTube') {
+        insightText = "YouTube audiences tend to be more critical overall. While humans see steady engagement, AI creators experience extreme volatility here—including a massive 42% skepticism spike on a single viral video.";
+    } else if (platform === 'Instagram') {
+        insightText = "Instagram's fast-paced, visual nature normalizes AI creators effortlessly. The engagement and trust metrics between AI and Humans on this platform are virtually indistinguishable.";
+    } else if (viewRange === 'high') {
+        insightText = "In highly viral content (over 5M views), AI creators hold their own. The data proves that massive reach does not automatically equal massive backlash for virtual influencers.";
+    } else if (viewRange === 'low') {
+        insightText = "For videos with under 5M views, we see a very stable normalization. Audiences interact with AI and human creators at almost exact parity when it comes to sentiment and trust.";
+    }
+
+    insightElement.innerText = insightText;
 }
 
 function applyFilters() {
-    const platformValue = document.getElementById('platformFilter').value;
-    const creatorValue = document.getElementById('creatorFilter').value;
+    const platform = document.getElementById('platformToggle').value;
+    const creator = document.getElementById('creatorToggle').value;
+    const viewRange = document.getElementById('viewsToggle').value;
 
     const filteredData = auditData.filter(row => {
-        const matchPlatform = platformValue === 'all' || row.platform === platformValue;
-        const matchCreator = creatorValue === 'all' || row.creator_type === creatorValue;
-        return matchPlatform && matchCreator;
+        const matchPlatform = platform === 'all' || row.platform === platform;
+        const matchCreator = creator === 'all' || row.creator_type === creator;
+        let matchViews = true;
+        if (viewRange === 'high') matchViews = row.views >= 5000000;
+        if (viewRange === 'low') matchViews = row.views < 5000000;
+        return matchPlatform && matchCreator && matchViews;
     });
 
+    updateDynamicInsight(platform, creator, viewRange);
     updateDashboard(filteredData);
 }
 
 function updateDashboard(data) {
-    if(data.length === 0) return;
+    if (data.length === 0) {
+        document.getElementById('totalViews').innerText = "0";
+        document.getElementById('totalLikes').innerText = "0";
+        document.getElementById('totalComments').innerText = "0";
+        document.getElementById('avgEngagement').innerText = "0%";
+        return;
+    }
 
-    updateScorecards(data);
-    populateTable(data);
-    
+    const totalViews = data.reduce((sum, row) => sum + row.views, 0);
+    const totalLikes = data.reduce((sum, row) => sum + row.likes, 0);
+    const totalComments = data.reduce((sum, row) => sum + row.comments_count, 0);
+    let avgEng = data.length > 0 ? data.reduce((sum, row) => sum + row.engagement_rate_pct, 0) / data.length : 0;
+
+    document.getElementById('totalViews').innerText = totalViews.toLocaleString();
+    document.getElementById('totalLikes').innerText = totalLikes.toLocaleString();
+    document.getElementById('totalComments').innerText = totalComments.toLocaleString();
+    document.getElementById('avgEngagement').innerText = avgEng.toFixed(2) + '%';
+
+    const labels = data.map(d => d.file_id);
+    const bgColors = data.map(d => d.creator_type === 'Human' ? colors.blue : colors.purple);
+
     const humanData = data.filter(d => d.creator_type === 'Human');
     const aiData = data.filter(d => d.creator_type === 'AI');
 
-    renderBarChart(data, humanData, aiData);
-    renderScatterChart(humanData, aiData);
-    renderPieChart(data);
-    renderRadarChart(humanData, aiData);
+    renderChart('distribution', 'pie', document.getElementById('distributionChart'), {
+        labels: ['Human Creators', 'AI Creators'],
+        datasets: [{ data: [humanData.length, aiData.length], backgroundColor: [colors.blue, colors.purple], borderWidth: 0 }]
+    }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } });
+
+    const formatPoint = (d) => ({ x: d.skepticism_index_pct, y: d.engagement_rate_pct, r: 8 });
+    renderChart('hypeMatrix', 'bubble', document.getElementById('hypeMatrixChart'), {
+        datasets: [
+            { label: 'Human', data: humanData.map(formatPoint), backgroundColor: colors.blue },
+            { label: 'AI', data: aiData.map(formatPoint), backgroundColor: colors.purple }
+        ]
+    }, { 
+        responsive: true, maintainAspectRatio: false,
+        scales: { 
+            x: { title: { display: true, text: 'Skepticism (%)' } }, 
+            y: { title: { display: true, text: 'Engagement Rate (%)' } } 
+        }
+    });
+
+    renderChart('sentiment', 'bar', document.getElementById('sentimentChart'), {
+        labels: labels,
+        datasets: [{
+            label: 'Sentiment Score',
+            data: data.map(d => d.sentiment_score),
+            backgroundColor: bgColors,
+            borderRadius: 4
+        }]
+    }, { 
+        responsive: true, maintainAspectRatio: false, 
+        plugins: { legend: { display: false } },
+        scales: { y: { suggestedMin: -0.2, suggestedMax: 0.3 } } 
+    });
+
+    renderChart('interactionRatio', 'doughnut', document.getElementById('interactionRatioChart'), {
+        labels: ['Total Likes', 'Total Comments'],
+        datasets: [{ data: [totalLikes, totalComments], backgroundColor: [colors.blue, colors.purple], borderWidth: 0 }]
+    }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } });
+
+    renderChart('platformEng', 'bar', document.getElementById('platformEngChart'), {
+        labels: labels,
+        datasets: [{
+            label: 'Engagement %',
+            data: data.map(d => d.engagement_rate_pct),
+            backgroundColor: bgColors,
+            borderRadius: 4
+        }]
+    }, { 
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } }
+    });
+
+    renderChart('platSkepticism', 'bar', document.getElementById('platSkepticismChart'), {
+        labels: labels,
+        datasets: [{
+            label: 'Skepticism Index %',
+            data: data.map(d => d.skepticism_index_pct),
+            backgroundColor: bgColors,
+            borderRadius: 4
+        }]
+    }, { 
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } }
+    });
+
+    renderChart('platViews', 'bar', document.getElementById('platViewsChart'), {
+        labels: labels,
+        datasets: [{
+            label: 'Views',
+            data: data.map(d => d.views),
+            backgroundColor: bgColors,
+            borderRadius: 4
+        }]
+    }, { 
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } }
+    });
+
+    populateDetailedTable(data);
 }
 
-function updateScorecards(data) {
-    const calcAvg = (key) => (data.reduce((sum, row) => sum + row[key], 0) / data.length).toFixed(2);
-    
-    const sentiment = calcAvg('sentiment_score');
-    document.getElementById('scoreSentiment').innerText = sentiment;
-    document.getElementById('scoreSentiment').style.color = sentiment > 0 ? '#4ade80' : '#f87171';
-    
-    document.getElementById('scoreSkepticism').innerText = calcAvg('skepticism_index_pct') + '%';
-    document.getElementById('scoreEngagement').innerText = calcAvg('engagement_rate_pct') + '%';
-    document.getElementById('scoreVelocity').innerText = calcAvg('comment_velocity_pct') + '%';
+function renderChart(key, type, canvas, data, options) {
+    if (!canvas || canvas.offsetParent === null) return; 
+    if (charts[key]) { charts[key].destroy(); }
+    const ctx = canvas.getContext('2d');
+    charts[key] = new Chart(ctx, { type: type, data: data, options: options });
 }
 
-function populateTable(data) {
-    const tbody = document.querySelector('#dataTable tbody');
-    tbody.innerHTML = '';
+function populateDetailedTable(data) {
+    const tbody = document.querySelector('#platformSummaryTable tbody');
+    tbody.innerHTML = ''; 
+
     data.forEach(row => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${row.file_id}</td>
-                <td>${row.platform}</td>
-                <td>${row.creator_type}</td>
-                <td>${row.views.toLocaleString()}</td>
-                <td>${row.engagement_rate_pct}%</td>
-                <td style="color: ${row.sentiment_score > 0 ? '#4ade80' : '#f87171'}">${row.sentiment_score}</td>
-                <td>${row.skepticism_index_pct}%</td>
-            </tr>
-        `;
-    });
-}
-
-function destroyChart(chartId) {
-    if (charts[chartId]) charts[chartId].destroy();
-}
-
-function renderBarChart(data, humanData, aiData) {
-    destroyChart('barChart');
-    const ctx = document.getElementById('barChart').getContext('2d');
-    const platforms = [...new Set(data.map(d => d.platform))];
-    
-    const getAvgSentiment = (platform, type) => {
-        const filtered = data.filter(d => d.platform === platform && d.creator_type === type);
-        if(filtered.length === 0) return 0;
-        return filtered.reduce((sum, d) => sum + d.sentiment_score, 0) / filtered.length;
-    };
-
-    const datasets = [];
-    if (humanData.length > 0) {
-        datasets.push({ label: 'Human', data: platforms.map(p => getAvgSentiment(p, 'Human')), backgroundColor: colors.human });
-    }
-    if (aiData.length > 0) {
-        datasets.push({ label: 'AI', data: platforms.map(p => getAvgSentiment(p, 'AI')), backgroundColor: colors.ai });
-    }
-
-    charts['barChart'] = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: platforms,
-            datasets: datasets
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            scales: { 
-                y: { 
-                    // Let Chart.js auto-scale perfectly to your data limits
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    ticks: { color: '#94a3b8' }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: '#94a3b8' }
-                }
-            },
-            plugins: {
-                legend: { labels: { color: '#94a3b8' } }
-            }
-        }
-    });
-}
-
-function renderScatterChart(humanData, aiData) {
-    destroyChart('scatterChart');
-    const ctx = document.getElementById('scatterChart').getContext('2d');
-    const formatPoint = (d) => ({ x: d.skepticism_index_pct, y: d.engagement_rate_pct, r: 6 });
-
-    const datasets = [];
-    if (humanData.length > 0) {
-        datasets.push({ label: 'Human', data: humanData.map(formatPoint), backgroundColor: colors.human });
-    }
-    if (aiData.length > 0) {
-        datasets.push({ label: 'AI', data: aiData.map(formatPoint), backgroundColor: colors.ai });
-    }
-
-    charts['scatterChart'] = new Chart(ctx, {
-        type: 'bubble',
-        data: { datasets: datasets },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            scales: { 
-                x: { 
-                    title: { display: true, text: 'Skepticism (%)', color: '#94a3b8' },
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    ticks: { color: '#94a3b8' }
-                }, 
-                y: { 
-                    title: { display: true, text: 'Engagement (%)', color: '#94a3b8' },
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    ticks: { color: '#94a3b8' }
-                } 
-            },
-            plugins: {
-                legend: { labels: { color: '#94a3b8' } }
-            }
-        }
-    });
-}
-
-function renderPieChart(data) {
-    destroyChart('pieChart');
-    const ctx = document.getElementById('pieChart').getContext('2d');
-    const totalLikes = data.reduce((sum, d) => sum + d.likes, 0);
-    const totalComments = data.reduce((sum, d) => sum + d.comments_count, 0);
-
-    charts['pieChart'] = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Likes', 'Comments'],
-            datasets: [{ data: [totalLikes, totalComments], backgroundColor: ['#a855f7', '#fbbf24'], borderColor: '#1e293b', borderWidth: 2 }]
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { labels: { color: '#94a3b8' } }
-            }
-        }
-    });
-}
-
-function renderRadarChart(humanData, aiData) {
-    destroyChart('radarChart');
-    const ctx = document.getElementById('radarChart').getContext('2d');
-    
-    const getAvg = (dataset, key) => dataset.length === 0 ? 0 : dataset.reduce((sum, d) => sum + d[key], 0) / dataset.length;
-    
-    const normEng = (val) => Math.min((val / 20) * 100, 100); 
-    const normSkp = (val) => Math.min((val / 50) * 100, 100); 
-    const normVel = (val) => Math.min((val / 2) * 100, 100);  
-    const normSen = (val) => ((val + 1) / 2) * 100;           
-
-    const datasets = [];
-    
-    if (humanData.length > 0) {
-        datasets.push({ 
-            label: 'Human (Scaled)', 
-            data: [
-                normEng(getAvg(humanData, 'engagement_rate_pct')), 
-                normSkp(getAvg(humanData, 'skepticism_index_pct')), 
-                normVel(getAvg(humanData, 'comment_velocity_pct')), 
-                normSen(getAvg(humanData, 'sentiment_score'))
-            ], 
-            backgroundColor: 'rgba(56, 189, 248, 0.2)', 
-            borderColor: colors.humanBorder 
-        });
-    }
-    
-    if (aiData.length > 0) {
-        datasets.push({ 
-            label: 'AI (Scaled)', 
-            data: [
-                normEng(getAvg(aiData, 'engagement_rate_pct')), 
-                normSkp(getAvg(aiData, 'skepticism_index_pct')), 
-                normVel(getAvg(aiData, 'comment_velocity_pct')), 
-                normSen(getAvg(aiData, 'sentiment_score'))
-            ], 
-            backgroundColor: 'rgba(244, 63, 94, 0.2)', 
-            borderColor: colors.aiBorder 
-        });
-    }
-
-    charts['radarChart'] = new Chart(ctx, {
-        type: 'radar',
-        data: {
-            labels: ['Eng. Rate', 'Skept. (%)', 'Velocity', 'Positive Trust'],
-            datasets: datasets
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            scales: { 
-                r: { 
-                    beginAtZero: true, 
-                    max: 100,
-                    angleLines: { color: 'rgba(255,255,255,0.1)' },
-                    grid: { color: 'rgba(255,255,255,0.1)' },
-                    pointLabels: { color: '#94a3b8' },
-                    ticks: { 
-                        // This removes the ugly white box and makes the text match the dark theme
-                        backdropColor: 'transparent', 
-                        color: '#94a3b8' 
-                    }
-                } 
-            },
-            plugins: {
-                legend: { labels: { color: '#94a3b8' } }
-            }
-        }
+        tbody.innerHTML += `<tr>
+            <td><strong>${row.file_id}</strong></td>
+            <td>${row.platform}</td>
+            <td>${row.creator_type}</td>
+            <td>${row.views.toLocaleString()}</td>
+            <td>${row.engagement_rate_pct.toFixed(2)}%</td>
+            <td>${row.skepticism_index_pct.toFixed(2)}%</td>
+            <td style="color: ${row.sentiment_score > 0 ? '#10b981' : '#ef4444'}"><strong>${row.sentiment_score.toFixed(4)}</strong></td>
+        </tr>`;
     });
 }
 
